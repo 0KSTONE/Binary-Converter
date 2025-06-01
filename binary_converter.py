@@ -2,10 +2,12 @@
 """
 Simple Binary ↔ Text/Number Converter
 
-- Converts ASCII text ↔ 8‑bit binary strings.
+- Converts Unicode text ↔ 8‑bit binary strings (UTF-8 encoding).
 - Converts integer numbers ↔ binary strings.
 - Presents a menu so the human operator selects which direction to use.
 """
+
+import datetime
 
 def text_to_binary(text: str) -> str:
     """
@@ -40,11 +42,21 @@ def binary_to_int(bin_str: str) -> int:
         raise ValueError(f"Invalid binary number: '{bin_str}'")
     return int(bin_str, 2)
 
+def save_to_file(content: str, conversion_type: str):
+    """
+    Save the given content to a new file with a timestamp and conversion type in the filename.
+    """
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"conversion_{conversion_type}_{timestamp}.txt"
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"Result saved to {filename}")
+
 def main():
     menu = """
 Select conversion mode:
-1) Text → Binary (8‑bit ASCII)
-2) Binary (8‑bit ASCII) → Text
+1) Text → Binary (UTF-8, 8‑bit per byte)
+2) Binary (8‑bit, UTF-8) → Text
 3) Integer → Binary
 4) Binary → Integer
 0) Exit
@@ -58,25 +70,37 @@ Select conversion mode:
 
         try:
             if choice == '1':
-                text = input("Enter ASCII text: ")
+                text = input("Enter Unicode text: ")
                 binary = text_to_binary(text)
-                print(f"Binary (8‑bit per char): {binary}")
+                print(f"Binary (UTF-8, 8‑bit per byte): {binary}")
+                save = input("Save result to file? (y/n): ").strip().lower()
+                if save == 'y':
+                    save_to_file(binary, "text_to_binary")
 
             elif choice == '2':
-                bin_str = input("Enter space‑separated 8‑bit binary (e.g. '01100001 01100010'): ").strip()
+                bin_str = input("Enter space‑separated 8‑bit binary (UTF-8, e.g. '01100001 01100010'): ").strip()
                 text = binary_to_text(bin_str)
-                print(f"ASCII text: {text}")
+                print(f"Decoded UTF-8 text: {text}")
+                save = input("Save result to file? (y/n): ").strip().lower()
+                if save == 'y':
+                    save_to_file(text, "binary_to_text")
 
             elif choice == '3':
                 num_str = input("Enter integer number: ").strip()
                 number = int(num_str)
                 binary = int_to_binary(number)
                 print(f"Binary representation: {binary}")
+                save = input("Save result to file? (y/n): ").strip().lower()
+                if save == 'y':
+                    save_to_file(binary, "int_to_binary")
 
             elif choice == '4':
                 bin_str = input("Enter binary number (e.g. '1101'): ").strip()
                 number = binary_to_int(bin_str)
                 print(f"Integer value: {number}")
+                save = input("Save result to file? (y/n): ").strip().lower()
+                if save == 'y':
+                    save_to_file(str(number), "binary_to_int")
 
             else:
                 print(f"Unrecognized option: '{choice}'. Please pick 0‑4.")
